@@ -24,7 +24,6 @@ var takeVideo = function () {
         var result = require('child_process').execSync('touch ./flag.txt');
 
         (async function () {
-
             await new Promise(resolve => setTimeout(resolve, 8750));
             takeVideo();
         }())

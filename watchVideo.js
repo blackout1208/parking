@@ -6,6 +6,21 @@ const FormData = require("form-data");
 const { exec } = require('child_process');
 const { Datastore } = require('@google-cloud/datastore');
 
+Object.defineProperty(Date.prototype, 'YYYYMMDDHHMMSS', {
+    value: function() {
+        function pad2(n) {  // always returns a string
+            return (n < 10 ? '0' : '') + n;
+        }
+
+        return this.getFullYear() +
+               pad2(this.getMonth() + 1) + 
+               pad2(this.getDate()) + "_" +
+               pad2(this.getHours()) + "_" +
+               pad2(this.getMinutes()) +"_" +
+               pad2(this.getSeconds());
+    }
+});
+
 let options = { stdio: 'pipe' };
 
 var index = 1;
@@ -21,13 +36,15 @@ fs.watchFile(buttonPressesLogFile, (curr, prev) => {
     index = 1;
 
     console.log(`${buttonPressesLogFile} file Changed`);
-
+    
+    const fileName = new Date().YYYYMMDDHHMMSS();
 
     console.log("Converting .h264 to .mp4...");
-    var result = require('child_process').execSync('ffmpeg -y -framerate 24 -i test.h264 -c copy ./html/output.mp4', options);
+    var result = require('child_process').execSync('ffmpeg -y -framerate 24 -i test.h264 -c copy ./html/'+fileName+'.mp4', options);
 
     console.log("Converting video to frames...");
-    var result1 = require('child_process').execSync('ffmpeg -y -i ./html/output.mp4 -r 0.1 ./html/frames/output_%04d.png', options);
+    
+    var result1 = require('child_process').execSync('ffmpeg -y -i ./html/'+fileName+'.mp4 -r 1 ./html/frames/output_'+fileName+'_%04d.png', options);
 
     analyzeImages(index);
 
